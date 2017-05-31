@@ -15,11 +15,11 @@ mariadb = everything // {
 };
 
 common = rec { # attributes common to both builds
-  version = "10.1.21";
+  version = "10.2.6";
 
   src = fetchurl {
     url    = "https://downloads.mariadb.org/interstitial/mariadb-${version}/source/mariadb-${version}.tar.gz";
-    sha256 = "144lcm5awcf0k6a7saqfr4p2kg8r5wbdhdm4cmn2m8hyg1an70as";
+    sha256 = "1rd2b1b6s87ymr5qhlggr4q4ljazv82ih0msgrbz1rfn81pcg1f3";
   };
 
   prePatch = ''
@@ -71,7 +71,7 @@ common = rec { # attributes common to both builds
     find "''${!outputBin}/bin" -name '*test*' -delete
   '';
 
-  passthru.mysqlVersion = "5.6";
+  passthru.mysqlVersion = "5.7";
 
   meta = with stdenv.lib; {
     description = "An enhanced, drop-in replacement for MySQL";
@@ -104,6 +104,7 @@ client = stdenv.mkDerivation (common // {
 
   # prevent cycle; it needs to reference $dev
   postInstall = common.postInstall + ''
+    moveToOutput bin/mariadb_config "$dev"
     moveToOutput bin/mysql_config "$dev"
   '';
 
