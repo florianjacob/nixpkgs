@@ -25,7 +25,6 @@
       with the following SQL commands:
       <programlisting>
         INSTALL PLUGIN unix_socket SONAME 'auth_socket';
-        ALTER USER root IDENTIFIED VIA unix_socket;
         CREATE DATABASE piwik;
         CREATE USER 'piwik'@'localhost' IDENTIFIED VIA unix_socket;
         GRANT ALL PRIVILEGES ON piwik.* TO 'piwik'@'localhost';
