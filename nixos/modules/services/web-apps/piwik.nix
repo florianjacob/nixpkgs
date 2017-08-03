@@ -24,6 +24,8 @@ in {
         default = false;
         description = ''
           Enable piwik web analytics with php-fpm backend.
+          It is mandatory to use at least the <literal>services.piwik.nginx</literal>
+          or the <literal>services.piwik.webServerUser</literal> option.
         '';
       };
 
@@ -31,7 +33,11 @@ in {
         type = types.str;
         example = "nginx";
         description = ''
-          Name of the owner of the ${phpSocket} fastcgi socket for piwik.
+          Name of the web server user that forwards requests to the ${phpSocket} fastcgi socket for piwik.
+          The user is granted access on ${phpSocket}.
+          If this option is not used, then the
+          <literal>services.piwik.webServerUser</literal> option is mandatory.
+          In that case, <literal>webServerUser</literal> defaults to <literal>"nginx"</literal>.
           If you want to use another webserver than nginx, you need to set this to that server's user
           and pass fastcgi requests to `index.php` and `piwik.php` to this socket.
         '';
@@ -92,6 +98,8 @@ in {
         description = ''
             The options to use to configure an nginx virtualHost.
             If null (the default), no nginx virtualHost will be configured.
+            If this option is not used, then the
+            <literal>services.piwik.webServerUser</literal> option is mandatory.
         '';
       };
     };
@@ -153,17 +161,23 @@ in {
       serviceConfig.UMask = "0007";
     };
 
-    services.phpfpm.poolConfigs = {
-      ${pool} = ''
-        listen = "${phpSocket}"
-        listen.owner = ${cfg.webServerUser}
-        listen.group = root
-        listen.mode = 0600
-        user = ${user}
-        env[PIWIK_USER_PATH] = ${dataDir}
-        ${cfg.phpfpmProcessManagerConfig}
-      '';
-    };
+    let
+      # if the nginx submodule is enabled, use "nginx" as default for webServerUser
+      webServerUser = if cfg.nginx != null && !(cfg ? webServerUser) then "nginx" else cfg.webServerUser;
+    in
+    {
+      services.phpfpm.poolConfigs = {
+        ${pool} = ''
+          listen = "${phpSocket}"
+          listen.owner = ${webServerUser}
+          listen.group = root
+          listen.mode = 0600
+          user = ${user}
+          env[PIWIK_USER_PATH] = ${dataDir}
+          ${cfg.phpfpmProcessManagerConfig}
+        '';
+      };
+    }
 
 
     services.nginx.virtualHosts = mkIf (cfg.nginx != null) {
