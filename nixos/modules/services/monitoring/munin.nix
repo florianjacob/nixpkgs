@@ -175,6 +175,14 @@ in
 
   }) (mkIf nodeCfg.enable {
 
+    environment.etc."munin/plugin-conf.d/munin-node".text = ''
+      ${lib.optionalString config.services.postfix.enable ''
+      [postfix_mailqueue]
+      # plugin needs to run as postfix user to access /var/lib/postfix/queue/*
+      user ${config.services.postfix.user}
+      ''}
+    '';
+
     systemd.services.munin-node = {
       description = "Munin Node";
       after = [ "network.target" ];
