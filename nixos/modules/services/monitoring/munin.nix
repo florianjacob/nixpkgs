@@ -201,6 +201,7 @@ in
       wantedBy = [ "multi-user.target" ];
       path = [ pkgs.munin ];
       environment.MUNIN_PLUGSTATE = "/var/run/munin";
+      restartTriggers = [ config.environment.etc."munin/plugin-conf.d/munin-node".source ];
       preStart = ''
         echo "updating munin plugins..."
 
