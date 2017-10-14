@@ -110,6 +110,16 @@ in
         '';
       };
 
+      extraPluginConfig = mkOption {
+        default = "";
+        type = types.lines;
+        description = ''
+          <filename>/etc/munin/plugin-conf.d/*</filename> extra plugin configuration. See
+          <link xlink:href='http://guide.munin-monitoring.org/en/stable/plugin/use.html#configuring' />
+        '';
+      };
+
+
       # TODO: add option to add additional plugins
 
     };
@@ -181,6 +191,8 @@ in
       # plugin needs to run as postfix user to access /var/lib/postfix/queue/*
       user ${config.services.postfix.user}
       ''}
+
+      ${nodeCfg.extraPluginConfig}
     '';
 
     systemd.services.munin-node = {
