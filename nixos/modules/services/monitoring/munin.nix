@@ -83,6 +83,16 @@ let
 
       ${nodeCfg.extraConfig}
     '';
+
+    pluginConf = pkgs.writeTextDir "munin-node" ''
+      ${lib.optionalString config.services.postfix.enable ''
+      [postfix_mailqueue]
+      # plugin needs to run as postfix user to access /var/lib/postfix/queue/*
+      user ${config.services.postfix.user}
+      ''}
+
+      ${nodeCfg.extraPluginConfig}
+    '';
 in
 
 {
@@ -185,16 +195,6 @@ in
 
   }) (mkIf nodeCfg.enable {
 
-    environment.etc."munin/plugin-conf.d/munin-node".text = ''
-      ${lib.optionalString config.services.postfix.enable ''
-      [postfix_mailqueue]
-      # plugin needs to run as postfix user to access /var/lib/postfix/queue/*
-      user ${config.services.postfix.user}
-      ''}
-
-      ${nodeCfg.extraPluginConfig}
-    '';
-
     systemd.services.munin-node = {
       description = "Munin Node";
       after = [ "network.target" ];
@@ -207,10 +207,10 @@ in
 
         mkdir -p /etc/munin/plugins
         rm -rf /etc/munin/plugins/*
-        PATH="/run/wrappers/bin:/run/current-system/sw/bin" ${pkgs.munin}/sbin/munin-node-configure --shell --families contrib,auto,manual --config ${nodeConf} --libdir=${muninPlugins} --servicedir=/etc/munin/plugins 2>/dev/null | ${pkgs.bash}/bin/bash
+        PATH="/run/wrappers/bin:/run/current-system/sw/bin" ${pkgs.munin}/sbin/munin-node-configure --shell --families contrib,auto,manual --config ${nodeConf} --libdir=${muninPlugins} --servicedir=/etc/munin/plugins --sconfdir=${pluginConf} 2>/dev/null | ${pkgs.bash}/bin/bash
       '';
       serviceConfig = {
-        ExecStart = "${pkgs.munin}/sbin/munin-node --config ${nodeConf} --servicedir /etc/munin/plugins/";
+        ExecStart = "${pkgs.munin}/sbin/munin-node --config ${nodeConf} --servicedir /etc/munin/plugins/ --sconfdir=${pluginConf} /etc/munin/plugin-conf.d";
       };
     };
 
