@@ -951,6 +951,11 @@ in
         }
       ];
 
+    lib.networking.fqdn =
+      let
+        join = hostName: domain: hostName + optionalString (domain != null) ".${domain}";
+      in join config.networking.hostName config.networking.domain;
+
     boot.kernelModules = [ ]
       ++ optional cfg.enableIPv6 "ipv6"
       ++ optional hasVirtuals "tun"
