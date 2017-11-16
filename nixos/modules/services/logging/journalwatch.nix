@@ -60,7 +60,7 @@ in {
       # then return something right-ish in the direction of /etc/hostname. Just bypass it completely.
       mailFrom = mkOption {
         type = types.str;
-        default = "journalwatch@${config.networking.hostName}";
+        default = "journalwatch@${config.lib.networking.fqdn}";
         description = ''
           Mail address to send journalwatch reports from.
         '';
