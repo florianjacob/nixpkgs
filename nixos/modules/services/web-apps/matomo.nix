@@ -14,11 +14,6 @@ let
   phpExecutionUnit = "phpfpm-${pool}";
   databaseService = "mysql.service";
 
-  fqdn =
-    let
-      join = hostName: domain: hostName + optionalString (domain != null) ".${domain}";
-     in join config.networking.hostName config.networking.domain;
-
 in {
   options = {
     services.matomo = {
@@ -199,7 +194,7 @@ in {
       # References:
       # https://fralef.me/piwik-hardening-with-nginx-and-php-fpm.html
       # https://github.com/perusio/piwik-nginx
-      "${user}.${fqdn}" = mkMerge [ cfg.nginx {
+      "${user}.${config.lib.networking.fqdn}" = mkMerge [ cfg.nginx {
         # don't allow to override the root easily, as it will almost certainly break matomo.
         # disadvantage: not shown as default in docs.
         root = mkForce "${cfg.package}/share";
