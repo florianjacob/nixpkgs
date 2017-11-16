@@ -4,8 +4,8 @@ with lib;
 
 let
 
-  host = config.networking.hostName or "unknown"
-       + optionalString (config.networking.domain != null) ".${config.networking.domain}";
+  # TODO: handle when fqdn was manually set to "", to get hostname via DHCP?
+  host = config.lib.networking.fqdn;
 
   cfg = config.services.smartd;
 
