@@ -345,7 +345,7 @@ in
 
       hostname = mkOption {
         type = types.str;
-        default = "";
+        default = config.lib.networking.fqdn;
         description ="
           Hostname to use. Leave blank to use just the hostname of machine.
           It should be FQDN.
