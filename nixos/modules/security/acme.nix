@@ -163,6 +163,17 @@ in
         '';
       };
 
+      selfsignedOnly = mkOption {
+        type = types.bool;
+        default = false;
+        description = ''
+          Skip the actual ACME validation process
+          and only generate and use the preliminary selfsigned certificates.
+          Useful for testing environments that not yet have their production domain names assigend to them,
+          or for machines that are not reachable from the internet at all.
+        '';
+      };
+
       production = mkOption {
         type = types.bool;
         default = true;
@@ -379,7 +390,7 @@ in
       );
 
       systemd.targets."acme-selfsigned-certificates" = mkIf cfg.preliminarySelfsigned {};
-      systemd.targets."acme-certificates" = {};
+      systemd.targets."acme-certificates" = mkIf !cfg.selfsignedOnly {};
     })
 
   ];
